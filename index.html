@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self' data:; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; base-uri 'self'; form-action 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Progress & Timer Tracker</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" referrerpolicy="no-referrer">
+  
+  <!-- Favicon -->
+  <link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%236366f1'/></svg>" />
+  
+  <!-- Modular Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="ambient-glow"></div>
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="container" id="mainContainer">
+    <!-- Mode Switcher -->
+    <div class="mode-switch-wrapper" id="modeSwitchWrapper">
+      <div class="mode-switch">
+        <button id="taskModeBtn" class="mode-tab active">Task Progress</button>
+        <button id="timerModeBtn" class="mode-tab">Countdown Timer</button>
+      </div>
+    </div>
+
+    <div class="tracker-card" id="trackerCard">
+      <!-- Header -->
+      <div class="header-bar">
+        <div class="goal-input-wrapper">
+          <input
+            type="text"
+            id="goalTitleInput"
+            class="goal-input"
+            value="Project Milestone"
+            placeholder="Name your goal or timer..."
+            title="Edit title"
+            maxlength="100"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="goal-subtitle" id="headerSubtitle">Task Increment Mode &bull; Progress autosaved</div>
+        </div>
+        <div class="header-actions">
+          <!-- Widget Mode Toggle Button -->
+          <button id="widgetToggleBtn" class="icon-btn" title="Toggle compact widget mode">
+            <svg id="widgetIcon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+            </svg>
+          </button>
+
+          <!-- Pop-out / Picture-in-Picture Button -->
+          <button id="pipBtn" class="icon-btn" title="Pop out floating mini window (Picture-in-Picture)">
+            <svg id="pipIcon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <rect x="11" y="9" width="9" height="6" rx="1" ry="1" fill="currentColor"></rect>
+            </svg>
+          </button>
+
+          <!-- Volume Slider Group -->
+          <div class="volume-control-group" title="Adjust sound volume">
+            <button id="soundToggle" class="icon-btn active" style="width: 30px; height: 30px; border: none; background: transparent;" title="Mute/Unmute audio">
+              <svg id="volumeIcon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+              </svg>
+            </button>
+            <input 
+              type="range" 
+              id="volumeSlider" 
+              class="volume-slider" 
+              min="0" 
+              max="100" 
+              value="80" 
+              title="Volume: 80%" 
+            />
+            <span id="volumeLevelText" class="volume-level-label">80%</span>
+          </div>
+
+          <button id="themeToggle" class="icon-btn" title="Toggle dark/light theme">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+          <button id="resetBtn" class="icon-btn" title="Reset current progress">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M3 12a9 9 0 0 1 15.5-6.4L21 8"></path>
+              <path d="M21 3v5h-5"></path>
+              <path d="M21 12a9 9 0 0 1-15.5 6.4L3 16"></path>
+              <path d="M3 21v-5h5"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Completion Banner -->
+      <div id="completionBanner" class="completion-banner">
+        <h3 id="bannerTitle">🎉 Goal Achieved! 100% Complete</h3>
+        <p id="bannerDesc">All tasks completed for this overarching milestone.</p>
+      </div>
+
+      <!-- Progress / Time Display Row -->
+      <div class="progress-stats-row">
+        <!-- Task Mode Display -->
+        <div id="percentageDisplayWrapper" class="percentage-display">
+          <span id="percentageNumber">0.0</span>
+          <span class="percentage-symbol">%</span>
+        </div>
+
+        <!-- Timer Mode Display -->
+        <div id="timerClockDisplay" class="timer-clock-display" style="display: none;">
+          05:00
+        </div>
+
+        <div id="statusBadge" class="progress-status-badge">
+          <span id="statusDot" class="status-dot"></span>
+          <span id="statusText">Ready</span>
+        </div>
+      </div>
+
+      <!-- Main Progress Bar -->
+      <div class="bar-container">
+        <div class="bar-track">
+          <div id="barFill" class="bar-fill">
+            <div class="bar-shimmer"></div>
+            <div class="bar-head-glow"></div>
+          </div>
+        </div>
+
+        <!-- Milestones (0%, 25%, 50%, 75%, 100%) -->
+        <div class="milestones">
+          <div class="milestone-node passed" data-step="0">
+            <div class="tick"></div>
+            <span class="label">0%</span>
+          </div>
+          <div class="milestone-node" data-step="25">
+            <div class="tick"></div>
+            <span class="label">25%</span>
+          </div>
+          <div class="milestone-node" data-step="50">
+            <div class="tick"></div>
+            <span class="label">50%</span>
+          </div>
+          <div class="milestone-node" data-step="75">
+            <div class="tick"></div>
+            <span class="label">75%</span>
+          </div>
+          <div class="milestone-node" data-step="100">
+            <div class="tick"></div>
+            <span class="label">100%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics Strip (Revised Language) -->
+      <div class="stats-strip">
+        <div class="stat-item">
+          <div class="stat-label" id="metricLabel1">Tasks Completed</div>
+          <div id="metricValue1" class="stat-value">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label" id="metricLabel2">Progress Remaining</div>
+          <div id="metricValue2" class="stat-value">100%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label" id="metricLabel3">Est. Tasks Remaining</div>
+          <div id="metricValue3" class="stat-value">10</div>
+        </div>
+      </div>
+
+      <!-- TASK INCREMENT CONTROLS -->
+      <div id="taskControlsArea">
+        <div class="config-box">
+          <div class="config-title">
+            <span>TASK INCREMENT SETTING</span>
+            <span style="font-weight: 500; font-size: 0.78rem; color: var(--text-muted);">
+              Amount added per task
+            </span>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="increment-options-row">
+            <button class="preset-chip" data-val="5">+5%</button>
+            <button class="preset-chip active" data-val="10">+10%</button>
+            <button class="preset-chip" data-val="12.5">+12.5%</button>
+            <button class="preset-chip" data-val="20">+20%</button>
+            <button class="preset-chip" data-val="25">+25%</button>
+            <button class="preset-chip" data-val="33.33">+33.3%</button>
+          </div>
+
+          <!-- Custom Numeric Input and Task Count Calculator -->
+          <div class="custom-input-row">
+            <div class="input-field-group">
+              <input
+                type="number"
+                id="customIncrementInput"
+                min="0.1"
+                max="100"
+                step="any"
+                value="10"
+                placeholder="Custom %"
+              />
+              <span class="input-suffix">% per task</span>
+            </div>
+            <div class="input-field-group" style="flex: 1;">
+              <input
+                type="number"
+                id="totalTasksHelper"
+                min="1"
+                max="1000"
+                placeholder="e.g. 8 tasks total"
+              />
+              <span class="input-suffix">total tasks</span>
+            </div>
+          </div>
+          <div class="helper-text">
+            <span>Enter a custom percentage or total tasks to automatically set increment</span>
+            <span>Shortcut: <kbd>Space</kbd> or <kbd>Enter</kbd></span>
+          </div>
+        </div>
+
+        <!-- Task Action Buttons -->
+        <div class="action-container" id="actionArea">
+          <button id="completeBtn" class="btn-complete">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+            <span id="completeBtnText">Complete Task (+10%)</span>
+            <span class="keyboard-hint"><kbd>Space</kbd></span>
+          </button>
+          <button id="undoBtn" class="btn-secondary" title="Undo last task" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 14L4 9l5-5"></path>
+              <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"></path>
+            </svg>
+            Undo
+          </button>
+        </div>
+
+        <!-- Activity History Drawer -->
+        <div class="history-drawer">
+          <div class="history-header" id="historyHeader">
+            <span>Activity History (<span id="historyCount">0</span> entries)</span>
+            <span id="historyArrow">▼</span>
+          </div>
+          <div class="history-list" id="historyList">
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 0.5rem;">
+              No tasks logged yet. Complete a task above to begin.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COUNTDOWN TIMER CONTROLS -->
+      <div id="timerControlsArea" style="display: none;">
+        <div class="config-box">
+          <div class="config-title">
+            <span>TIMER DURATION SETTING</span>
+            <span style="font-weight: 500; font-size: 0.78rem; color: var(--text-muted);">
+              Set target duration
+            </span>
+          </div>
+
+          <!-- Duration Presets (single row) -->
+          <div class="increment-options-row timer-presets-row">
+            <button class="preset-chip timer-preset" data-mins="1">1 min</button>
+            <button class="preset-chip timer-preset active" data-mins="5">5 min</button>
+            <button class="preset-chip timer-preset" data-mins="10">10 min</button>
+            <button class="preset-chip timer-preset" data-mins="15">15 min</button>
+            <button class="preset-chip timer-preset" data-mins="30">30 min</button>
+            <button class="preset-chip timer-preset" data-mins="60">60 min</button>
+          </div>
+
+          <!-- Custom Duration Inputs -->
+          <div class="custom-input-row">
+            <div class="input-field-group">
+              <input
+                type="number"
+                id="timerMinutesInput"
+                min="0"
+                max="999"
+                value="5"
+                placeholder="Minutes"
+              />
+              <span class="input-suffix">minutes</span>
+            </div>
+            <div class="input-field-group">
+              <input
+                type="number"
+                id="timerSecondsInput"
+                min="0"
+                max="59"
+                value="0"
+                placeholder="Seconds"
+              />
+              <span class="input-suffix">seconds</span>
+            </div>
+          </div>
+          <div class="helper-text">
+            <span>Select a duration preset or enter custom minutes and seconds</span>
+            <span>Shortcut: <kbd>Space</kbd> to Start/Pause</span>
+          </div>
+        </div>
+
+        <!-- Timer Action Buttons -->
+        <div class="action-container">
+          <button id="timerToggleBtn" class="btn-complete">
+            <svg id="timerPlayIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span id="timerBtnText">Start Countdown</span>
+            <span class="keyboard-hint"><kbd>Space</kbd></span>
+          </button>
+          <button id="timerResetBtn" class="btn-secondary" title="Reset countdown timer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 0 1 15.5-6.4L21 8"></path>
+              <path d="M21 3v5h-5"></path>
+              <path d="M21 12a9 9 0 0 1-15.5 6.4L3 16"></path>
+              <path d="M3 21v-5h5"></path>
+            </svg>
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Reset Confirmation Modal (PiP & Mobile friendly) -->
+      <div id="resetConfirmModal" class="reset-confirm-overlay">
+        <div class="reset-confirm-box">
+          <div class="reset-confirm-title">Reset Progress?</div>
+          <div class="reset-confirm-desc">Are you sure you want to reset all tasks and activity history for this goal?</div>
+          <div class="reset-confirm-actions">
+            <button id="cancelResetBtn" class="reset-modal-btn cancel">Cancel</button>
+            <button id="confirmResetBtn" class="reset-modal-btn confirm">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modular Scripts -->
+  <script src="sounds/whitebag_base64.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

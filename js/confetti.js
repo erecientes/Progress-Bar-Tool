@@ -5,20 +5,24 @@
 class ConfettiController {
   constructor(canvasId = 'confettiCanvas') {
     this.canvas = document.getElementById(canvasId);
-    this.ctx = this.canvas.getContext('2d');
+    this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
     this.particles = [];
     this.animId = null;
 
-    this.resize();
-    window.addEventListener('resize', () => this.resize());
+    if (this.canvas) {
+      this.resize();
+      window.addEventListener('resize', () => this.resize());
+    }
   }
 
   resize() {
+    if (!this.canvas) return;
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
   }
 
   launch() {
+    if (!this.canvas || !this.ctx) return;
     this.particles = [];
     const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'];
 

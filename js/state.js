@@ -99,7 +99,7 @@ class StateManager {
   }
 
   setIncrement(val) {
-    if (val > 0) {
+    if (typeof val === 'number' && Number.isFinite(val) && val > 0) {
       const clamped = Math.min(100, Math.max(0.1, val));
       this.state.increment = Math.round(clamped * 100) / 100;
       this.saveState();
@@ -107,7 +107,8 @@ class StateManager {
   }
 
   setVolume(vol) {
-    this.state.volume = Math.max(0, Math.min(100, vol));
+    const num = (typeof vol === 'number' && Number.isFinite(vol)) ? vol : 80;
+    this.state.volume = Math.max(0, Math.min(100, num));
     this.saveState();
   }
 
@@ -117,7 +118,7 @@ class StateManager {
   }
 
   setTheme(theme) {
-    this.state.theme = theme;
+    this.state.theme = theme === 'light' ? 'light' : 'dark';
     this.saveState();
   }
 
@@ -222,14 +223,16 @@ class StateManager {
   // --- Countdown Timer Actions ---
 
   setTimerDuration(totalSeconds) {
-    this.state.timerTotalSeconds = Math.max(1, totalSeconds);
+    const secs = (typeof totalSeconds === 'number' && Number.isFinite(totalSeconds)) ? Math.floor(totalSeconds) : 300;
+    this.state.timerTotalSeconds = Math.max(1, Math.min(86400, secs));
     this.state.timerRemainingSeconds = this.state.timerTotalSeconds;
     this.state.timerRunning = false;
     this.saveState();
   }
 
   setTimerRemaining(remainingSeconds) {
-    this.state.timerRemainingSeconds = Math.max(0, remainingSeconds);
+    const secs = (typeof remainingSeconds === 'number' && Number.isFinite(remainingSeconds)) ? remainingSeconds : 0;
+    this.state.timerRemainingSeconds = Math.max(0, secs);
   }
 
   setTimerRunning(isRunning) {

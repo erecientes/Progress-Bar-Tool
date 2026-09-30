@@ -147,28 +147,28 @@ document.addEventListener('DOMContentLoaded', () => {
     dynamicFavicon.href = favCanvas.toDataURL('image/png');
   }
 
-  // --- DYNAMIC COMPACTNESS / MICRO-WIDGET HANDLER ---
+  // --- DYNAMIC COMPACTNESS / MINI & MICRO WIDGET HANDLER ---
   function updateWidgetCompactness(cardEl) {
     if (!cardEl) return;
     const win = cardEl.ownerDocument.defaultView || window;
     const winW = win.innerWidth;
     const winH = win.innerHeight;
 
-    const inWidgetOrPopout = stateMgr.state.widgetMode || document.body.classList.contains('popout-window');
-
-    if (!inWidgetOrPopout) {
-      cardEl.classList.remove('micro-mode', 'nano-mode', 'dock-row');
+    // Compact widget views (mini, micro) only apply when widget mode is active
+    if (!stateMgr.state.widgetMode) {
+      cardEl.classList.remove('mini-mode', 'micro-mode');
       return;
     }
 
-    // Mini Mode activates only when the window/viewport is too small for full widget mode
-    const isMicro = winW <= 330 || winH <= 260;
-    const isNano = winH <= 125 && winW < 420;
-    const isDockRow = winW >= 420 && winH <= 140;
+    // Micro view activates when window is made even smaller (ultimate condensed view: only bar + buttons, no timer)
+    // Mini view can reach down to 110px before switching to micro view
+    const isMicro = winH <= 110 || (winW <= 230 && winH <= 140);
 
+    // Mini view activates when compact, seamlessly fitting between 110px and 220px height
+    const isMini = !isMicro && (winW <= 310 || winH <= 220);
+
+    cardEl.classList.toggle('mini-mode', isMini);
     cardEl.classList.toggle('micro-mode', isMicro);
-    cardEl.classList.toggle('nano-mode', isNano);
-    cardEl.classList.toggle('dock-row', isDockRow);
   }
 
   // --- WIDGET MODE HANDLER ---
@@ -222,7 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const isPopoutWindow = urlParams.get('popout') === '1';
   if (isPopoutWindow) {
+    document.documentElement.classList.add('popout-window');
     document.body.classList.add('popout-window');
+    stateMgr.setWidgetMode(true);
     applyWidgetMode(true);
     if (pipBtn) pipBtn.style.display = 'none';
     updateWidgetCompactness(trackerCard);
@@ -266,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Floating toast animation (+X% or -X%)
   function spawnFloatingToast(text, isNegative = false) {
+    if (!actionArea) return;
     const toast = document.createElement('div');
     toast.className = 'floating-toast';
     toast.textContent = text;
@@ -274,12 +277,14 @@ document.addEventListener('DOMContentLoaded', () => {
       toast.style.textShadow = '0 2px 10px rgba(239, 68, 68, 0.5)';
     }
 
-    const rect = completeBtn.getBoundingClientRect();
-    toast.style.left = `${rect.width / 2 - 25}px`;
+    const rect = completeBtn ? completeBtn.getBoundingClientRect() : { width: 100 };
+    toast.style.left = `${(rect.width || 100) / 2 - 25}px`;
     toast.style.top = '-15px';
 
     actionArea.appendChild(toast);
-    setTimeout(() => toast.remove(), 1000);
+    setTimeout(() => {
+      if (toast.parentNode) toast.remove();
+    }, 1000);
   }
 
   // Format seconds to MM:SS or HH:MM:SS
@@ -750,9 +755,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateCustomTimerInput() {
     pauseTimer();
-    const mins = parseInt(timerMinutesInput.value, 10) || 0;
-    const secs = parseInt(timerSecondsInput.value, 10) || 0;
-    const totalSecs = Math.max(1, mins * 60 + secs);
+    let mins = parseInt(timerMinutesInput.value, 10) || 0;
+    let secs = parseInt(timerSecondsInput.value, 10) || 0;
+    if (mins < 0) mins = 0;
+    if (mins > 1440) mins = 1440; // Max 24 hours
+    if (secs < 0) secs = 0;
+    if (secs > 59) secs = 59;
+    const totalSecs = Math.max(1, Math.min(86400, mins * 60 + secs));
 
     stateMgr.setTimerDuration(totalSecs);
 
@@ -882,9 +891,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   totalTasksHelper.addEventListener('input', (e) => {
-    const total = parseInt(e.target.value, 10);
+    let total = parseInt(e.target.value, 10);
     if (!isNaN(total) && total > 0) {
-      const computed = Math.round((100 / total) * 100) / 100;
+      if (total > 1000) {
+        total = 1000;
+        e.target.value = '1000';
+      }
+      const computed = Math.max(0.1, Math.round((100 / total) * 100) / 100);
       stateMgr.setIncrement(computed);
       customIncrementInput.value = computed;
       render();
@@ -951,6 +964,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   timerMinutesInput.addEventListener('input', updateCustomTimerInput);
   timerSecondsInput.addEventListener('input', updateCustomTimerInput);
+  timerMinutesInput.addEventListener('blur', () => {
+    timerMinutesInput.value = Math.floor(stateMgr.state.timerTotalSeconds / 60);
+  });
+  timerSecondsInput.addEventListener('blur', () => {
+    timerSecondsInput.value = stateMgr.state.timerTotalSeconds % 60;
+  });
 
   // --- PICTURE-IN-PICTURE / STANDALONE MINI POP-OUT WINDOW ---
   let pipWindowRef = null;
@@ -994,9 +1013,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set title and body styling in PiP window
         pipWindow.document.title = document.title;
         pipWindow.document.documentElement.setAttribute('data-theme', stateMgr.state.theme);
+        pipWindow.document.documentElement.className = 'popout-window';
+        pipWindow.document.documentElement.style.background = 'var(--surface-card)';
         pipWindow.document.body.className = 'popout-window';
-        pipWindow.document.body.style.background = 'var(--bg)';
+        pipWindow.document.body.style.background = 'var(--surface-card)';
         pipWindow.document.body.style.margin = '0';
+        pipWindow.document.body.style.padding = '0';
         pipWindow.document.body.style.boxSizing = 'border-box';
         pipWindow.document.body.style.overflow = 'hidden';
 
@@ -1028,6 +1050,12 @@ document.addEventListener('DOMContentLoaded', () => {
         pipWindow.addEventListener('resize', onPipResize);
         onPipResize();
 
+        // Keyboard shortcut handling inside PiP window
+        const onPipKeydown = (e) => {
+          handleGlobalKeydown(e, pipWindow.document);
+        };
+        pipWindow.addEventListener('keydown', onPipKeydown);
+
         placeholder.querySelector('#restorePipBtn').addEventListener('click', () => {
           pipWindow.close();
         });
@@ -1035,6 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Return card to main tab when PiP window closes
         pipWindow.addEventListener('pagehide', () => {
           pipWindow.removeEventListener('resize', onPipResize);
+          pipWindow.removeEventListener('keydown', onPipKeydown);
           if (placeholder.parentNode) {
             placeholder.parentNode.insertBefore(trackerCard, placeholder);
             placeholder.remove();
@@ -1121,15 +1150,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Global Keyboard Shortcuts
-  window.addEventListener('keydown', (e) => {
+  // Global Keyboard Shortcuts (Main Window & PiP)
+  function handleGlobalKeydown(e, doc = document) {
     if (e.key === 'Escape' && resetConfirmModal && resetConfirmModal.classList.contains('show')) {
       sound.playOriginalTaskSound();
       resetConfirmModal.classList.remove('show');
       return;
     }
 
-    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+    const activeEl = doc ? doc.activeElement : document.activeElement;
+    if (activeEl && ['INPUT', 'TEXTAREA'].includes(activeEl.tagName)) return;
 
     if (e.code === 'Space' || e.code === 'Enter') {
       e.preventDefault();
@@ -1144,7 +1174,9 @@ document.addEventListener('DOMContentLoaded', () => {
         handleUndoTask();
       }
     }
-  });
+  }
+
+  window.addEventListener('keydown', (e) => handleGlobalKeydown(e, document));
 
   // Initialize
   render();

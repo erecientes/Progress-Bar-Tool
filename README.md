@@ -42,10 +42,14 @@ progress bar/
 - **Brief Test Chime Preview**: Plays a short, pleasant preview chime when dragging or adjusting the volume slider.
 - **Mute Button**: One-click toggle to silence or restore audio.
 
-### 4. Compact Widget Mode & Picture-in-Picture Pop-out
+### 4. Compact Widget Mode, Mini View & Micro View (Picture-in-Picture)
 - **Widget Mode Toggle**: Click the minimize/expand icon in the header to collapse into a distraction-free widget bar.
 - **Picture-in-Picture Floating Window**: Click the PiP icon in the header to detach the tracker into a native OS **Always-On-Top** floating window (Document Picture-in-Picture API) or standalone compact popup window. Keep your progress bar or countdown visible over any application while working.
-- **Cross-Window Realtime Sync**: Changes in the floating mini window or main tab sync instantly via `localStorage`.
+- **Responsive View Scaling in PiP & Compact Windows**:
+  - **Normal Widget View**: Full header, stats strip, progress bar, and controls.
+  - **Mini View**: Automatically activates when window size is reduced; features enlarged vertical scaling (taller progress bar and taller complete/resume button), timer/percentage progress display, and a dedicated **Undo** button beside Complete Task in Task Mode.
+  - **Micro View (Ultimate Condensed View)**: Automatically activates when window is shrunk even smaller; hides all timer text/clocks and displays strictly the progress bar and primary action button (with **Undo** button retained in Task Mode).
+- **Cross-Window Realtime Sync**: Changes in the floating mini/micro window or main tab sync instantly via `localStorage`.
 
 ## Keyboard Shortcuts
 

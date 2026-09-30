@@ -1094,13 +1094,13 @@ kbd {
 }
 
 /* Standalone Popout Window & PiP Body */
+html.popout-window,
 body.popout-window {
-  padding: 0.4rem !important;
+  padding: 0 !important;
   margin: 0 !important;
+  background-color: var(--surface-card) !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
   width: 100vw !important;
   height: 100vh !important;
   box-sizing: border-box !important;
@@ -1115,7 +1115,6 @@ body.popout-window .container {
   margin: 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important;
   flex: 1 !important;
 }
 
@@ -1125,25 +1124,296 @@ body.popout-window .pip-btn {
   display: none !important;
 }
 
-body.popout-window .tracker-card {
+body.popout-window .tracker-card,
+body.popout-window .tracker-card.widget-mode,
+body.popout-window .tracker-card.mini-mode,
+body.popout-window .tracker-card.micro-mode {
   width: 100% !important;
   max-width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: var(--surface-card) !important;
   box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+body.popout-window .tracker-card.mini-mode {
+  padding: clamp(0.35rem, 2vh, 0.75rem) clamp(0.65rem, 3.2vw, 1.25rem) !important;
+  gap: clamp(0.2rem, 1.4vh, 0.45rem) !important;
+}
+
+body.popout-window .tracker-card.micro-mode {
+  padding: clamp(0.3rem, 1.5vh, 0.55rem) clamp(0.5rem, 2.5vw, 0.85rem) !important;
+  gap: clamp(0.2rem, 1vh, 0.4rem) !important;
+}
+
+/* Non-widget Full View in PiP / Popout Window with Dedicated Scroll Bar */
+body.popout-window .tracker-card:not(.widget-mode) {
+  display: block !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: clamp(0.85rem, 2.5vh, 1.25rem) clamp(0.95rem, 3vw, 1.5rem) 2.5rem clamp(0.95rem, 3vw, 1.5rem) !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+}
+
+body.popout-window .tracker-card:not(.widget-mode)::-webkit-scrollbar {
+  width: 6px;
+}
+
+body.popout-window .tracker-card:not(.widget-mode)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body.popout-window .tracker-card:not(.widget-mode)::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.45);
+  border-radius: 9999px;
+}
+
+body.popout-window .tracker-card:not(.widget-mode)::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+body.popout-window .tracker-card:not(.widget-mode) .header-bar {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+body.popout-window .tracker-card:not(.widget-mode) .goal-input {
+  font-size: 1.25rem;
+}
+
+body.popout-window .tracker-card:not(.widget-mode) .stats-strip {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  gap: 0.5rem;
+}
+
+body.popout-window .tracker-card:not(.widget-mode) .stat-value {
+  font-size: 1.1rem;
+}
+
+body.popout-window .reset-confirm-overlay {
+  position: fixed !important;
+  inset: 0 !important;
 }
 
 /* ==========================================================================
-   Ultra-Compact Micro Widget Mode (for tiny PiP / popout / window sizes)
+   Mini View & Micro View (Picture-in-Picture & Compact Viewports)
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   1. MINI VIEW (.tracker-card.mini-mode)
+   Compact layout with larger vertical scaling (taller bar & taller buttons)
+   Displays progress clock/percentage + progress bar + action buttons (with Undo in task mode)
+   -------------------------------------------------------------------------- */
+
+.tracker-card.mini-mode {
+  padding: clamp(0.45rem, 2.5vh, 0.95rem) clamp(0.75rem, 3.2vw, 1.25rem) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: none !important;
+  border: 1px solid var(--border) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: clamp(0.25rem, 1.5vh, 0.6rem) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 0 !important;
+}
+
+.tracker-card.mini-mode .header-bar,
+.tracker-card.mini-mode .stats-strip,
+.tracker-card.mini-mode .milestones,
+.tracker-card.mini-mode .config-box,
+.tracker-card.mini-mode .history-drawer,
+.tracker-card.mini-mode .keyboard-hint,
+.tracker-card.mini-mode .goal-subtitle {
+  display: none !important;
+}
+
+/* Progress Stats Row in Mini View */
+.tracker-card.mini-mode .progress-stats-row,
+.tracker-card.mini-mode .progress-hero {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  margin: 0 0 clamp(0.12rem, 0.6vh, 0.3rem) 0 !important;
+  padding: 0 0.15rem !important;
+  gap: 0.4rem !important;
+}
+
+.tracker-card.mini-mode .percentage-display,
+.tracker-card.mini-mode .timer-clock-display {
+  font-size: clamp(1.15rem, 4.8vw, 1.85rem) !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.tracker-card.mini-mode .percentage-symbol {
+  font-size: clamp(0.75rem, 3vw, 1.05rem) !important;
+}
+
+.tracker-card.mini-mode .progress-status-badge {
+  display: inline-flex !important;
+  padding: 0.18rem 0.55rem !important;
+  font-size: 0.68rem !important;
+  border-radius: 9999px !important;
+  gap: 0.25rem !important;
+}
+
+.tracker-card.mini-mode .status-dot {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+/* Progress Bar in Mini View: TALLER vertical scaling */
+.tracker-card.mini-mode .bar-container {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.tracker-card.mini-mode .bar-track {
+  height: clamp(20px, 4.5vh, 26px) !important;
+  border-radius: 9999px !important;
+  background: var(--surface-hover) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.tracker-card.mini-mode .bar-head-glow {
+  width: 13px !important;
+  height: 13px !important;
+  right: 5px !important;
+}
+
+/* Task Mode Controls in Mini View: TALLER buttons + Undo button on right */
+.tracker-card.mini-mode #taskControlsArea .action-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: clamp(0.35rem, 1.5vw, 0.6rem) !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.tracker-card.mini-mode #taskControlsArea #completeBtn {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  min-height: clamp(40px, 6.8vh, 50px) !important;
+  padding: clamp(0.55rem, 2vh, 0.85rem) clamp(0.65rem, 2vw, 1rem) !important;
+  font-size: clamp(0.82rem, 3.2vw, 0.95rem) !important;
+  font-weight: 700 !important;
+  border-radius: var(--radius-sm) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.22) !important;
+}
+
+.tracker-card.mini-mode #taskControlsArea #completeBtn svg {
+  width: clamp(15px, 3.5vw, 18px) !important;
+  height: clamp(15px, 3.5vw, 18px) !important;
+  flex-shrink: 0 !important;
+}
+
+.tracker-card.mini-mode #completeBtnText {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.tracker-card.mini-mode #taskControlsArea #undoBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  flex: 0 0 auto !important;
+  min-height: clamp(40px, 6.8vh, 50px) !important;
+  padding: clamp(0.55rem, 2vh, 0.85rem) clamp(0.75rem, 2.5vw, 1.15rem) !important;
+  font-size: clamp(0.78rem, 2.8vw, 0.92rem) !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.tracker-card.mini-mode #taskControlsArea #undoBtn svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Timer Mode Controls in Mini View: TALLER resume/toggle button, no reset button */
+.tracker-card.mini-mode #timerControlsArea .action-container {
+  display: flex !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.tracker-card.mini-mode #timerControlsArea #timerToggleBtn {
+  width: 100% !important;
+  min-height: clamp(40px, 6.8vh, 50px) !important;
+  padding: clamp(0.55rem, 2vh, 0.85rem) 1rem !important;
+  font-size: clamp(0.82rem, 3.2vw, 0.96rem) !important;
+  font-weight: 700 !important;
+  border-radius: var(--radius-sm) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.45rem !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.22) !important;
+}
+
+.tracker-card.mini-mode #timerControlsArea #timerToggleBtn svg {
+  width: clamp(16px, 3.5vw, 19px) !important;
+  height: clamp(16px, 3.5vw, 19px) !important;
+  flex-shrink: 0 !important;
+}
+
+.tracker-card.mini-mode #timerControlsArea #timerResetBtn {
+  display: none !important;
+}
+
+.tracker-card.mini-mode .completion-banner {
+  padding: 0.4rem 0.75rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
+.tracker-card.mini-mode .completion-banner h3 {
+  font-size: 0.85rem !important;
+}
+
+.tracker-card.mini-mode .completion-banner p {
+  display: none !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. MICRO VIEW (.tracker-card.micro-mode)
+   Ultimate condensed view when window is even smaller:
+   Only include progress bar + action buttons (no timer display)
+   In task progress mode: Complete task button + Undo button to the right
+   -------------------------------------------------------------------------- */
+
 .tracker-card.micro-mode {
-  padding: clamp(0.35rem, 1.8vh, 0.65rem) clamp(0.5rem, 2.5vw, 0.85rem) !important;
+  padding: clamp(0.35rem, 1.8vh, 0.6rem) clamp(0.5rem, 2.5vw, 0.85rem) !important;
   border-radius: var(--radius-sm) !important;
   box-shadow: none !important;
   border: 1px solid var(--border) !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
-  gap: clamp(0.2rem, 1vh, 0.35rem) !important;
+  gap: clamp(0.25rem, 1.2vh, 0.45rem) !important;
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
@@ -1155,85 +1425,67 @@ body.popout-window .tracker-card {
 .tracker-card.micro-mode .milestones,
 .tracker-card.micro-mode .config-box,
 .tracker-card.micro-mode .history-drawer,
-.tracker-card.micro-mode .btn-secondary,
 .tracker-card.micro-mode .keyboard-hint,
 .tracker-card.micro-mode .goal-subtitle {
   display: none !important;
 }
 
-.tracker-card.micro-mode .progress-hero {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: baseline !important;
-  justify-content: space-between !important;
-  margin: 0 !important;
-  padding: 0 0.15rem !important;
-  gap: 0.4rem !important;
-}
-
+/* NO TIMER / NO CLOCK / NO PERCENTAGE ROW in Micro View */
+.tracker-card.micro-mode .progress-stats-row,
+.tracker-card.micro-mode .progress-hero,
 .tracker-card.micro-mode .percentage-display,
-.tracker-card.micro-mode .timer-clock-display {
-  font-size: clamp(1.05rem, 4.5vw, 1.4rem) !important;
-  font-weight: 800 !important;
-  line-height: 1 !important;
-  letter-spacing: -0.02em !important;
-}
-
-.tracker-card.micro-mode .percentage-symbol {
-  font-size: 0.75rem !important;
-}
-
+.tracker-card.micro-mode .timer-clock-display,
 .tracker-card.micro-mode .progress-status-badge {
-  padding: 0.12rem 0.4rem !important;
-  font-size: 0.62rem !important;
-  border-radius: 9999px !important;
-  gap: 0.25rem !important;
+  display: none !important;
 }
 
-.tracker-card.micro-mode .status-dot {
-  width: 5px !important;
-  height: 5px !important;
-}
-
+/* Progress Bar in Micro View */
 .tracker-card.micro-mode .bar-container {
   margin: 0 !important;
   width: 100% !important;
 }
 
 .tracker-card.micro-mode .bar-track {
-  height: clamp(10px, 2.5vh, 16px) !important;
+  height: clamp(12px, 3vh, 16px) !important;
   border-radius: 9999px !important;
   background: var(--surface-hover) !important;
   border: 1px solid var(--border) !important;
 }
 
 .tracker-card.micro-mode .bar-head-glow {
-  width: 7px !important;
-  height: 7px !important;
+  width: 9px !important;
+  height: 9px !important;
   right: 3px !important;
 }
 
-.tracker-card.micro-mode .action-container {
-  margin: 0 !important;
-  gap: 0 !important;
+/* Task Mode Controls in Micro View: Complete Task button + Undo button on right */
+.tracker-card.micro-mode #taskControlsArea .action-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 0.35rem !important;
   width: 100% !important;
+  margin: 0 !important;
 }
 
-.tracker-card.micro-mode .btn-complete {
-  width: 100% !important;
-  padding: clamp(0.35rem, 1.8vh, 0.55rem) 0.65rem !important;
-  font-size: clamp(0.72rem, 3.2vw, 0.88rem) !important;
-  min-height: unset !important;
-  height: auto !important;
+.tracker-card.micro-mode #taskControlsArea #completeBtn {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  min-height: clamp(34px, 5.5vh, 40px) !important;
+  padding: clamp(0.35rem, 1.5vh, 0.55rem) 0.65rem !important;
+  font-size: clamp(0.75rem, 3.2vw, 0.88rem) !important;
+  font-weight: 700 !important;
   border-radius: var(--radius-sm) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   gap: 0.35rem !important;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.22) !important;
-  justify-content: center !important;
 }
 
-.tracker-card.micro-mode .btn-complete svg {
-  width: clamp(13px, 3.2vw, 16px) !important;
-  height: clamp(13px, 3.2vw, 16px) !important;
+.tracker-card.micro-mode #taskControlsArea #completeBtn svg {
+  width: 15px !important;
+  height: 15px !important;
   flex-shrink: 0 !important;
 }
 
@@ -1243,14 +1495,64 @@ body.popout-window .tracker-card {
   white-space: nowrap !important;
 }
 
+.tracker-card.micro-mode #taskControlsArea #undoBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.25rem !important;
+  flex: 0 0 auto !important;
+  min-height: clamp(34px, 5.5vh, 40px) !important;
+  padding: clamp(0.35rem, 1.5vh, 0.55rem) clamp(0.6rem, 2vw, 0.9rem) !important;
+  font-size: clamp(0.74rem, 2.8vw, 0.84rem) !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.tracker-card.micro-mode #taskControlsArea #undoBtn svg {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Timer Mode Controls in Micro View: Resume/toggle button full width, no reset button */
+.tracker-card.micro-mode #timerControlsArea .action-container {
+  display: flex !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.tracker-card.micro-mode #timerControlsArea #timerToggleBtn {
+  width: 100% !important;
+  min-height: clamp(34px, 5.5vh, 40px) !important;
+  padding: clamp(0.35rem, 1.5vh, 0.55rem) 0.75rem !important;
+  font-size: clamp(0.78rem, 3.2vw, 0.9rem) !important;
+  font-weight: 700 !important;
+  border-radius: var(--radius-sm) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.22) !important;
+}
+
+.tracker-card.micro-mode #timerControlsArea #timerToggleBtn svg {
+  width: 15px !important;
+  height: 15px !important;
+  flex-shrink: 0 !important;
+}
+
+.tracker-card.micro-mode #timerControlsArea #timerResetBtn {
+  display: none !important;
+}
+
 .tracker-card.micro-mode .completion-banner {
-  padding: 0.3rem 0.5rem !important;
-  margin-bottom: 0.25rem !important;
+  padding: 0.25rem 0.5rem !important;
+  margin-bottom: 0.2rem !important;
   gap: 0.2rem !important;
 }
 
 .tracker-card.micro-mode .completion-banner h3 {
-  font-size: 0.8rem !important;
+  font-size: 0.78rem !important;
   margin: 0 !important;
 }
 
@@ -1258,21 +1560,117 @@ body.popout-window .tracker-card {
   display: none !important;
 }
 
-/* Responsive Media Queries fallback */
-@media (max-width: 330px), (max-height: 260px) {
-  .tracker-card.widget-mode {
-    padding: clamp(0.35rem, 1.8vh, 0.65rem) clamp(0.5rem, 2.5vw, 0.85rem) !important;
+
+/* --------------------------------------------------------------------------
+   3. RESPONSIVE MEDIA QUERY FALLBACKS
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 310px), (max-height: 220px) {
+  body:not(.popout-window) .tracker-card.widget-mode:not(.micro-mode) {
+    padding: clamp(0.65rem, 2.8vh, 1rem) clamp(0.75rem, 3.2vw, 1.25rem) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: none !important;
+    border: 1px solid var(--border) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: clamp(0.4rem, 1.8vh, 0.65rem) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 0 !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) .header-bar,
+  .tracker-card.widget-mode:not(.micro-mode) .stats-strip,
+  .tracker-card.widget-mode:not(.micro-mode) .milestones,
+  .tracker-card.widget-mode:not(.micro-mode) .config-box,
+  .tracker-card.widget-mode:not(.micro-mode) .history-drawer,
+  .tracker-card.widget-mode:not(.micro-mode) .keyboard-hint,
+  .tracker-card.widget-mode:not(.micro-mode) .goal-subtitle {
+    display: none !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) .progress-stats-row,
+  .tracker-card.widget-mode:not(.micro-mode) .progress-hero {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    margin: 0 0 clamp(0.15rem, 0.8vh, 0.35rem) 0 !important;
+    padding: 0 0.15rem !important;
+    gap: 0.4rem !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) .percentage-display,
+  .tracker-card.widget-mode:not(.micro-mode) .timer-clock-display {
+    font-size: clamp(1.15rem, 4.8vw, 1.85rem) !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) .bar-track {
+    height: clamp(20px, 4.5vh, 26px) !important;
+    border-radius: 9999px !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) .bar-head-glow {
+    width: 13px !important;
+    height: 13px !important;
+    right: 5px !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) #taskControlsArea .action-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: clamp(0.35rem, 1.5vw, 0.6rem) !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) #taskControlsArea #completeBtn {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    min-height: clamp(40px, 6.8vh, 50px) !important;
+    padding: clamp(0.55rem, 2vh, 0.85rem) clamp(0.65rem, 2vw, 1rem) !important;
+    font-size: clamp(0.82rem, 3.2vw, 0.95rem) !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) #taskControlsArea #undoBtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+    flex: 0 0 auto !important;
+    min-height: clamp(40px, 6.8vh, 50px) !important;
+    padding: clamp(0.55rem, 2vh, 0.85rem) clamp(0.75rem, 2.5vw, 1.15rem) !important;
+    font-size: clamp(0.78rem, 2.8vw, 0.92rem) !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) #timerControlsArea #timerToggleBtn {
+    width: 100% !important;
+    min-height: clamp(40px, 6.8vh, 50px) !important;
+    padding: clamp(0.55rem, 2vh, 0.85rem) 1rem !important;
+    font-size: clamp(0.82rem, 3.2vw, 0.96rem) !important;
+  }
+
+  .tracker-card.widget-mode:not(.micro-mode) #timerControlsArea #timerResetBtn {
+    display: none !important;
+  }
+}
+
+@media (max-height: 110px), (max-width: 230px) and (max-height: 140px) {
+  body:not(.popout-window) .tracker-card.widget-mode {
+    padding: clamp(0.35rem, 1.8vh, 0.6rem) clamp(0.5rem, 2.5vw, 0.85rem) !important;
     border-radius: var(--radius-sm) !important;
     box-shadow: none !important;
     border: 1px solid var(--border) !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    gap: clamp(0.2rem, 1vh, 0.35rem) !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    min-height: 0 !important;
+    gap: clamp(0.25rem, 1.2vh, 0.45rem) !important;
   }
 
   .tracker-card.widget-mode .header-bar,
@@ -1280,44 +1678,11 @@ body.popout-window .tracker-card {
   .tracker-card.widget-mode .milestones,
   .tracker-card.widget-mode .config-box,
   .tracker-card.widget-mode .history-drawer,
-  .tracker-card.widget-mode .btn-secondary,
   .tracker-card.widget-mode .keyboard-hint,
-  .tracker-card.widget-mode .goal-subtitle {
-    display: none !important;
-  }
-
+  .tracker-card.widget-mode .goal-subtitle,
+  .tracker-card.widget-mode .progress-stats-row,
   .tracker-card.widget-mode .progress-hero {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: baseline !important;
-    justify-content: space-between !important;
-    margin: 0 !important;
-    padding: 0 0.15rem !important;
-    gap: 0.4rem !important;
-  }
-
-  .tracker-card.widget-mode .percentage-display,
-  .tracker-card.widget-mode .timer-clock-display {
-    font-size: clamp(1.05rem, 4.5vw, 1.4rem) !important;
-    font-weight: 800 !important;
-    line-height: 1 !important;
-    letter-spacing: -0.02em !important;
-  }
-
-  .tracker-card.widget-mode .percentage-symbol {
-    font-size: 0.75rem !important;
-  }
-
-  .tracker-card.widget-mode .progress-status-badge {
-    padding: 0.12rem 0.4rem !important;
-    font-size: 0.62rem !important;
-    border-radius: 9999px !important;
-    gap: 0.25rem !important;
-  }
-
-  .tracker-card.widget-mode .status-dot {
-    width: 5px !important;
-    height: 5px !important;
+    display: none !important;
   }
 
   .tracker-card.widget-mode .bar-container {
@@ -1326,149 +1691,50 @@ body.popout-window .tracker-card {
   }
 
   .tracker-card.widget-mode .bar-track {
-    height: clamp(10px, 2.5vh, 16px) !important;
+    height: clamp(12px, 3vh, 16px) !important;
     border-radius: 9999px !important;
-    background: var(--surface-hover) !important;
-    border: 1px solid var(--border) !important;
   }
 
-  .tracker-card.widget-mode .bar-head-glow {
-    width: 7px !important;
-    height: 7px !important;
-    right: 3px !important;
-  }
-
-  .tracker-card.widget-mode .action-container {
-    margin: 0 !important;
-    gap: 0 !important;
-    width: 100% !important;
-  }
-
-  .tracker-card.widget-mode .btn-complete {
-    width: 100% !important;
-    padding: clamp(0.35rem, 1.8vh, 0.55rem) 0.65rem !important;
-    font-size: clamp(0.72rem, 3.2vw, 0.88rem) !important;
-    min-height: unset !important;
-    height: auto !important;
-    border-radius: var(--radius-sm) !important;
+  .tracker-card.widget-mode #taskControlsArea .action-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
     gap: 0.35rem !important;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.22) !important;
-    justify-content: center !important;
-  }
-
-  .tracker-card.widget-mode .btn-complete svg {
-    width: clamp(13px, 3.2vw, 16px) !important;
-    height: clamp(13px, 3.2vw, 16px) !important;
-    flex-shrink: 0 !important;
-  }
-
-  .tracker-card.widget-mode #completeBtnText {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-
-  .tracker-card.widget-mode .completion-banner {
-    padding: 0.3rem 0.5rem !important;
-    margin-bottom: 0.25rem !important;
-    gap: 0.2rem !important;
-  }
-
-  .tracker-card.widget-mode .completion-banner h3 {
-    font-size: 0.8rem !important;
+    width: 100% !important;
     margin: 0 !important;
   }
 
-  .tracker-card.widget-mode .completion-banner p {
+  .tracker-card.widget-mode #taskControlsArea #completeBtn {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    min-height: clamp(34px, 5.5vh, 40px) !important;
+    padding: clamp(0.35rem, 1.5vh, 0.55rem) 0.65rem !important;
+    font-size: clamp(0.75rem, 3.2vw, 0.88rem) !important;
+  }
+
+  .tracker-card.widget-mode #taskControlsArea #undoBtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+    flex: 0 0 auto !important;
+    min-height: clamp(34px, 5.5vh, 40px) !important;
+    padding: clamp(0.35rem, 1.5vh, 0.55rem) clamp(0.6rem, 2vw, 0.9rem) !important;
+    font-size: clamp(0.74rem, 2.8vw, 0.84rem) !important;
+  }
+
+  .tracker-card.widget-mode #timerControlsArea #timerToggleBtn {
+    width: 100% !important;
+    min-height: clamp(34px, 5.5vh, 40px) !important;
+    padding: clamp(0.35rem, 1.5vh, 0.55rem) 0.75rem !important;
+    font-size: clamp(0.78rem, 3.2vw, 0.9rem) !important;
+  }
+
+  .tracker-card.widget-mode #timerControlsArea #timerResetBtn {
     display: none !important;
   }
 }
 
-/* Ultra-Short Nano Mode (height <= 130px, narrow) */
-.tracker-card.nano-mode {
-  padding: 0.2rem 0.5rem !important;
-  gap: 0.15rem !important;
-}
-.tracker-card.nano-mode .progress-hero {
-  margin: 0 !important;
-}
-.tracker-card.nano-mode .percentage-display,
-.tracker-card.nano-mode .timer-clock-display {
-  font-size: 0.95rem !important;
-}
-.tracker-card.nano-mode .progress-status-badge {
-  display: none !important;
-}
-.tracker-card.nano-mode .bar-track {
-  height: 8px !important;
-}
-.tracker-card.nano-mode .btn-complete {
-  padding: 0.25rem 0.5rem !important;
-  font-size: 0.72rem !important;
-}
-.tracker-card.nano-mode .btn-complete svg {
-  width: 12px !important;
-  height: 12px !important;
-}
-
-/* Wide Horizontal Dock Mode: arranges progress info on left, action on right */
-.tracker-card.micro-mode.dock-row,
-@media (min-width: 440px) and (max-height: 140px) {
-  .tracker-card.widget-mode,
-  .tracker-card.micro-mode {
-    display: grid !important;
-    grid-template-columns: 1fr auto !important;
-    grid-template-rows: auto auto !important;
-    align-items: center !important;
-    column-gap: clamp(0.6rem, 2vw, 1.25rem) !important;
-    row-gap: 0.2rem !important;
-    padding: clamp(0.3rem, 1.5vh, 0.55rem) clamp(0.75rem, 2.5vw, 1.4rem) !important;
-  }
-
-  .tracker-card.widget-mode .progress-hero,
-  .tracker-card.micro-mode .progress-hero {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .tracker-card.widget-mode .bar-container,
-  .tracker-card.micro-mode .bar-container {
-    grid-column: 1 !important;
-    grid-row: 2 !important;
-    margin: 0 !important;
-    width: 100% !important;
-  }
-
-  .tracker-card.widget-mode #taskControlsArea,
-  .tracker-card.micro-mode #taskControlsArea,
-  .tracker-card.widget-mode #timerControlsArea,
-  .tracker-card.micro-mode #timerControlsArea {
-    grid-column: 2 !important;
-    grid-row: 1 / span 2 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 !important;
-    width: auto !important;
-  }
-
-  .tracker-card.widget-mode .action-container,
-  .tracker-card.micro-mode .action-container {
-    margin: 0 !important;
-    width: auto !important;
-  }
-
-  .tracker-card.widget-mode .btn-complete,
-  .tracker-card.micro-mode .btn-complete {
-    width: auto !important;
-    min-width: clamp(140px, 20vw, 220px) !important;
-    padding: clamp(0.4rem, 1.5vh, 0.65rem) clamp(0.85rem, 2vw, 1.4rem) !important;
-    font-size: clamp(0.75rem, 2vw, 0.9rem) !important;
-    white-space: nowrap !important;
-  }
-}
 
 /* Custom Reset Confirmation Modal */
 .reset-confirm-overlay {
